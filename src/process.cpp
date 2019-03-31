@@ -5,7 +5,8 @@ namespace Process {
 namespace {
 
 template <typename Func>
-void RunParallel(const int thread_cnt, png::png &image, Func operation) {
+void ProcessImageParallel(const int thread_cnt, png::png &image,
+                          Func operation) {
     if (image.image.empty())
         return;
 
@@ -52,6 +53,6 @@ void HorizontalFlipRange(png::png &image, int first, int end) {
 } // namespace
 
 void HorizontalFlip(int thread_cnt, png::png &image) {
-    RunParallel(thread_cnt, image, &HorizontalFlipRange);
+    ProcessImageParallel(thread_cnt, image, &HorizontalFlipRange);
 }
 } // namespace Process
