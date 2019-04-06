@@ -30,8 +30,11 @@ void ProcessImageParallel(const int thread_cnt, png::png &image,
     }
 }
 
+/* Horizontally flip pixels of an image in place, between first and end
+ * first: index of first row to flip
+ * end: stop at this index
+ */
 void HorizontalFlipRange(png::png &image, int first, int end) {
-    // process rows first to non-inclusive end
     while (first < end) {
         // width is no. pixels, each pixel is 4 bytes
         const auto start_offset = (image.width * 4) * first;
@@ -55,4 +58,5 @@ void HorizontalFlipRange(png::png &image, int first, int end) {
 void HorizontalFlip(int thread_cnt, png::png &image) {
     ProcessImageParallel(thread_cnt, image, &HorizontalFlipRange);
 }
+void HorizontalFlip(png::png &image) { HorizontalFlip(2, image); }
 } // namespace Process

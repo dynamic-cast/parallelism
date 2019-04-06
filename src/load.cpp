@@ -8,9 +8,14 @@ extern "C" {
 #include "load.hpp"
 
 namespace Load {
-std::vector<std::string> ReadDir(const char *dir) {
-    std::string dir_path = dir;
+/*
+ * Given a directory path, reads all files ending *.png
+ * Takes (const char*) - full path to directory
+ * Returns (vector<string>): list of png files
+ */
+std::vector<std::string> ReadDirPngs(const char *dir) {
     std::vector<std::string> files;
+
     DIR *dir_stream = dir_stream = opendir(dir);
     struct dirent *dirp;
     if (dir_stream == NULL) {
@@ -19,12 +24,15 @@ std::vector<std::string> ReadDir(const char *dir) {
     std::regex re{".*+\\.png"};
     while ((dirp = readdir(dir_stream)) != NULL) {
         if (std::regex_match(dirp->d_name, re)) {
-            files.push_back(dir_path + "/" + std::string(dirp->d_name));
+            files.emplace_back(dirp->d_name);
         }
     }
     return files;
 }
-// read from disk
+
+/* Takes (string) path to file
+ * Returns (png) in memory image
+ */
 png::png ReadPng(const std::string &file_path) {
     png::png decoded;
 
