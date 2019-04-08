@@ -12,22 +12,13 @@ struct ThreadPool {
     ThreadPool(unsigned int _max_pool_size, std::vector<Task> tasks,
                Func operation)
         : max_pool_size(_max_pool_size), queue(std::move(tasks)) {
-        std::vector<std::thread> threads;
-        for (unsigned int i = 0; i < max_pool_size; i++) {
-            std::thread t(&ThreadPool::image_work, this, operation);
-            threads.emplace_back(std::move(t));
-        }
-
-        while (!queue.empty()) {
-            std::this_thread::sleep_for(std::chrono::milliseconds(10));
-        }
-
-        shutdown = true;
-
-        for (auto &thread : threads) {
-            thread.join();
-        }
+            // TODO implement me
+            // - start threads, give them `image_work` to do
+            // - poll for empty queue
+            // - send shutdown signal to threads when queue is empty
+            // - wait for threads to join
     }
+
     // explicitly disallow copy and move
     ThreadPool(const ThreadPool &) = delete;
     ThreadPool(ThreadPool &&) = delete;
@@ -44,28 +35,12 @@ struct ThreadPool {
     std::mutex pool_mutex;
 
     void image_work(Func operation) {
-        while (!shutdown) {
-            Task task;
-            bool has_task = false;
-            if (!queue.empty()) {
-                std::lock_guard<std::mutex> lock(pool_mutex);
-                if (!queue.empty()) {
-                    task = queue.back();
-                    queue.pop_back();
-                    has_task = true;
-                }
-            }
-            if (has_task) {
-                try {
-                    operation(task);
-                } catch (std::exception e) {
-                    std::cerr << e.what() << std::endl;
-                    // put back in pool or move on
-                }
-            } else {
-                std::this_thread::sleep_for(std::chrono::milliseconds(10));
-            }
-        }
+        // TODO implement me:
+        // - polling `queue` for work
+        // - acquiring lock and task from `queue`
+        // - performing `operation` on task
+        // - sleeping when no work to be done
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
     }
 };
 
