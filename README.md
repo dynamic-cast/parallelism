@@ -12,3 +12,6 @@ make
 ```
 ./build/main path/to/image.png
 ```
+
+### other
+Bundles LodePNG https://lodev.org/lodepng/

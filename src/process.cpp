@@ -51,6 +51,10 @@ void HorizontalFlipRange(png::png &image, int first, int end) {
 
 } // namespace
 
+void HorizontalFlip(png::png &image) {
+    RunParallel(1, image, &HorizontalFlipRange);
+}
+
 void HorizontalFlip(int thread_cnt, png::png &image) {
     RunParallel(thread_cnt, image, &HorizontalFlipRange);
 }
