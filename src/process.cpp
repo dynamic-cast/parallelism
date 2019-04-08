@@ -9,24 +9,10 @@ void RunParallel(const int thread_cnt, png::png &image, Func operation) {
     if (image.image.empty())
         return;
 
-    int chunk = std::floor(image.height / thread_cnt);
-    int remain = image.height % thread_cnt;
-
-    std::vector<std::thread> threads;
-    int last = 0;
-    // construct threads with work
-    for (int i = 0; i < thread_cnt; i++, remain--) {
-        int first = last;
-        last = remain > 0 ? first + chunk + 1 : first + chunk;
-
-        std::thread t(operation, std::ref(image), first, last);
-        threads.push_back(std::move(t));
-    }
-
-    // wait to finish and join
-    for (auto &t : threads) {
-        t.join();
-    }
+    // TODO implement me:
+    // - chunk image into rows
+    // - start threads with `operation` to perform
+    // - join and wait for threads to finish
 }
 
 void HorizontalFlipRange(png::png &image, int first, int end) {
