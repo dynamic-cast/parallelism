@@ -13,6 +13,8 @@ int main(const int argc, const char *argv[]) {
     std::string target_dir = argv[2];
 
     int max_workers = (int)std::thread::hardware_concurrency();
+    if (argc == 4)
+        max_workers = std::stoi(argv[3]);
 
     auto files = Load::ReadDirPngs(argv[1]);
     if (files.empty()) {

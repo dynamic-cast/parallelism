@@ -10,5 +10,5 @@ make
 
 ### run
 ```
-./build/main path/to/image.png
+./build/main path/to/image/dir path/to/processed/dir {number of workers}
 ```
