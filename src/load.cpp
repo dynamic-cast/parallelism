@@ -21,7 +21,7 @@ std::vector<std::string> ReadDirPngs(const char *dir) {
     if (dir_stream == NULL) {
         throw std::runtime_error("Could not open directory for reading");
     }
-    std::regex re{".*+\\.png"};
+    std::regex re{".+\\.png"};
     while ((dirp = readdir(dir_stream)) != NULL) {
         if (std::regex_match(dirp->d_name, re)) {
             files.emplace_back(dirp->d_name);
