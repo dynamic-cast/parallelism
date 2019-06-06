@@ -12,18 +12,27 @@ struct ThreadPool {
     ThreadPool(unsigned int _max_pool_size, std::vector<Task> tasks,
                Func operation)
         : max_pool_size(_max_pool_size), queue(std::move(tasks)) {
-            // TODO implement me
-            std::vector<std::thread> thread_pool;
-            std::cout << "Hello Karenka!" << std::endl;
-            for(unsigned i=0; i<max_pool_size; i++)
-                thread_pool.push_back(std::thread(&ThreadPool::image_work, this, operation));
-            // - poll for empty queue
-            while(!queue.empty()) {
-                std::this_thread::sleep_for(std::chrono::milliseconds(10));
+            // - start threads, give them `image_work` to do
+            std::vector<std::thread> threads;
+            for (auto start = 0; start < max_pool_size; ++start)
+            {
+              threads.emplace_back([this, operation](){ image_work(operation); });
             }
+
+            // - poll for empty queue
+            // - send shutdown signal to threads when queue is empty
+            while (!queue.empty())
+            {
+              std::this_thread::sleep_for(std::chrono::milliseconds(10));
+            }
+
             shutdown = true;
-            for(auto& thread : thread_pool)
-                thread.join();
+
+            // - wait for threads to join
+            for (auto& t : threads)
+            {
+              t.join();
+            }
     }
 
     // explicitly disallow copy and move
@@ -42,25 +51,25 @@ struct ThreadPool {
     std::mutex pool_mutex;
 
     void image_work(Func operation) {
-        // TODO implement me:
-        // - polling `queue` for work
-        while(!shutdown) {
-            std::unique_ptr<Task> task;
+        while (!shutdown)
+        {
+          std::unique_ptr<Task> taskPtr;
+          {
+            std::lock_guard<std::mutex> lock(pool_mutex);
+            if (!queue.empty())
             {
-                std::lock_guard<std::mutex> lock(pool_mutex);
-                if(!queue.empty())
-                {
-                    task = std::make_unique<Task>(queue.back());
-                    queue.pop_back();
-                }
+              taskPtr = std::make_unique<Task>(queue.back());
+              queue.pop_back();
             }
-                operation(*task);
-            // - acquiring lock and task from `queue`
-            // - performing `operation` on task
-            // - sleeping when no work to be done
-            std::this_thread::sleep_for(std::chrono::milliseconds(10));
+            else
+            {
+              std::this_thread::sleep_for(std::chrono::milliseconds(10));
+            }
+          }
+
+          if (taskPtr)
+            operation(*taskPtr);
         }
-        return;
     }
 };
 
