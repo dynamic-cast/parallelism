@@ -1,18 +1,49 @@
 #include "process.hpp"
 
+#include <thread>
+#include <future>
+
 namespace Process {
 
 namespace {
 
 template <typename Func>
-void RunParallel(const int thread_cnt, png::png &image, Func operation) {
+void RunParallel(const int threadCount, png::png& image, Func operation) {
     if (image.image.empty())
         return;
 
-    // TODO implement me:
     // - chunk image into rows
+    unsigned chunkSize = std::floor(image.height / threadCount);
+
+    std::vector<std::thread> threads;
     // - start threads with `operation` to perform
+    for (auto start = 0; start < image.height; start += chunkSize)
+    {
+        auto end = std::min(start + chunkSize, image.height);
+        threads.emplace_back(operation, std::ref(image), start, end);
+    }
+
     // - join and wait for threads to finish
+    for (auto& t : threads)
+    {
+        t.join();
+    }
+}
+
+template <typename Func>
+void RunParallelAsync(const int threadCount, png::png& image, Func operation) {
+    if (image.image.empty())
+        return;
+
+    // - chunk image into rows
+    unsigned chunkSize = std::floor(image.height / threadCount);
+
+    // - start threads with `operation` to perform
+    for (auto start = 0; start < image.height; start += chunkSize)
+    {
+        auto end = std::min(start + chunkSize, image.height);
+        std::async(operation, std::ref(image), start, end);
+    }
 }
 
 void HorizontalFlipRange(png::png &image, int first, int end) {
@@ -24,8 +55,9 @@ void HorizontalFlipRange(png::png &image, int first, int end) {
         // pointer to first byte of interest
         unsigned char *begin = image.image.data() + start_offset;
         // process bytes in terms of pixels (4 bytes)
-        auto px_first = reinterpret_cast<png::pixel *>(begin);
+        auto px_first = reinterpret_cast<png::pixel*>(begin);
         auto px_last = px_first + image.width - 1;
+
         while (px_first < px_last) {
             std::swap(*px_first, *px_last);
             px_first++;
@@ -38,10 +70,10 @@ void HorizontalFlipRange(png::png &image, int first, int end) {
 } // namespace
 
 void HorizontalFlip(png::png &image) {
-    RunParallel(1, image, &HorizontalFlipRange);
+    RunParallelAsync(1, image, &HorizontalFlipRange);
 }
 
 void HorizontalFlip(int thread_cnt, png::png &image) {
-    RunParallel(thread_cnt, image, &HorizontalFlipRange);
+    RunParallelAsync(thread_cnt, image, &HorizontalFlipRange);
 }
 } // namespace Process
