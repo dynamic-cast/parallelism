@@ -10,6 +10,7 @@ ADD_LIBRARY(lodepng STATIC
 
 ADD_LIBRARY(process STATIC
     ${PROJECT_SOURCE_DIR}/src/load.cpp
+    ${PROJECT_SOURCE_DIR}/src/threads.hpp
     ${PROJECT_SOURCE_DIR}/src/process.cpp
 )
 
