@@ -38,11 +38,14 @@ void RunParallelAsync(const int threadCount, png::png& image, Func operation) {
     // - chunk image into rows
     unsigned chunkSize = std::floor(image.height / threadCount);
 
+    std::vector<std::future<void>> results;
+    results.reserve(threadCount);
+
     // - start threads with `operation` to perform
     for (auto start = 0; start < image.height; start += chunkSize)
     {
         auto end = std::min(start + chunkSize, image.height);
-        std::async(operation, std::ref(image), start, end);
+        results.push_back(std::async(operation, std::ref(image), start, end));
     }
 }
 
